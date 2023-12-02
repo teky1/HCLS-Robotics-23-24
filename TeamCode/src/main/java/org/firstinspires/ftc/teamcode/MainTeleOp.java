@@ -1,15 +1,25 @@
-package org.firstinspires.ftc.teamcode.Joel;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.Servo;
 
-public class TeleOp extends LinearOpMode {
+@TeleOp
+public class MainTeleOp extends LinearOpMode {
 
-    // tune until slides don't fall
+    // slides
     public double slideKg = 0;
+    public double pivotHeight = 500;
+
+    // pivots
+    public double flatPivot = 0;
+    public double anglePivot = 0.5;
+
+    // claw
+    public double clawOpen = 1;
+    public double clawClosed = 0;
 
 
     private DcMotorEx driveBL;
@@ -19,34 +29,74 @@ public class TeleOp extends LinearOpMode {
 
     private DcMotorEx slidesMotor;
 
+    private Servo claw;
+    private Servo clawPivot;
+
+    private boolean clawBtnPressed = false;
+    private boolean isClawOpen = false;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
         initDrivetrain();
-        initOuttake();
+        initSlides();
+        initClaw();
         waitForStart();
 
         while(opModeIsActive()) {
-            updateOuttake();
+            updateSlides();
             updateDrivetrain();
+
+            if(gamepad2.a && !clawBtnPressed) {
+                isClawOpen = !isClawOpen;
+                setClaw(isClawOpen);
+            }
+            clawBtnPressed = gamepad2.a;
         }
 
 
     }
 
-    private void initOuttake() {
+    private void initClaw() {
+        claw = hardwareMap.get(Servo.class, "claw");
+        clawPivot = hardwareMap.get(Servo.class, "clawPivot");
 
+        setClawPivot(true);
+        setClaw(false);
+    }
+
+    private void setClaw(boolean open) {
+        if(open) {
+            claw.setPosition(clawOpen);
+        } else {
+            claw.setPosition(clawClosed);
+        }
+    }
+
+    private void setClawPivot(boolean flat) {
+        if(flat) {
+            claw.setPosition(flatPivot);
+        } else {
+            claw.setPosition(anglePivot);
+        }
+    }
+
+    private void initSlides() {
         slidesMotor = hardwareMap.get(DcMotorEx.class, "slides");
+
+        slidesMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slidesMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         slidesMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //        slidesMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
     }
 
-    private void updateOuttake() {
+    private void updateSlides() {
 
         double inputPower = -gamepad2.left_stick_y;
         slidesMotor.setPower(inputPower + slideKg);
+
+        setClawPivot(slidesMotor.getCurrentPosition() < pivotHeight);
 
     }
 
