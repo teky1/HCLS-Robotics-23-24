@@ -75,9 +75,9 @@ public class MainTeleOp extends LinearOpMode {
 
     private void setClawPivot(boolean flat) {
         if(flat) {
-            claw.setPosition(flatPivot);
+            clawPivot.setPosition(flatPivot);
         } else {
-            claw.setPosition(anglePivot);
+            clawPivot.setPosition(anglePivot);
         }
     }
 
