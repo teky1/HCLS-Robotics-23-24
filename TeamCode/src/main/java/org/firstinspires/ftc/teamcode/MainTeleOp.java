@@ -15,11 +15,13 @@ public class MainTeleOp extends LinearOpMode {
 
     // pivots
     public double flatPivot = 0;
-    public double anglePivot = 0.5;
+    public double anglePivot = 0.25;
 
     // claw
-    public double clawOpen = 1;
-    public double clawClosed = 0;
+    public double clawOpen = 0.35;
+    public double clawClosed = 0.55;
+    public double claw2Open = 0.55;
+    public double claw2Closed = 0.35;
 
 
     private DcMotorEx driveBL;
@@ -30,10 +32,13 @@ public class MainTeleOp extends LinearOpMode {
     private DcMotorEx slidesMotor;
 
     private Servo claw;
+    private Servo claw2;
     private Servo clawPivot;
 
     private boolean clawBtnPressed = false;
     private boolean isClawOpen = false;
+    private boolean clawPivotPressed = false;
+    private boolean isClawFlat = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -52,6 +57,12 @@ public class MainTeleOp extends LinearOpMode {
                 setClaw(isClawOpen);
             }
             clawBtnPressed = gamepad2.a;
+
+            if(gamepad2.x && !clawPivotPressed) {
+                isClawFlat = !isClawFlat;
+                setClawPivot(isClawFlat);
+            }
+            clawPivotPressed = gamepad2.x;
         }
 
 
@@ -59,6 +70,7 @@ public class MainTeleOp extends LinearOpMode {
 
     private void initClaw() {
         claw = hardwareMap.get(Servo.class, "claw");
+        claw2 = hardwareMap.get(Servo.class, "claw2");
         clawPivot = hardwareMap.get(Servo.class, "clawPivot");
 
         setClawPivot(true);
@@ -68,8 +80,10 @@ public class MainTeleOp extends LinearOpMode {
     private void setClaw(boolean open) {
         if(open) {
             claw.setPosition(clawOpen);
+            claw2.setPosition(claw2Open);
         } else {
             claw.setPosition(clawClosed);
+            claw2.setPosition(claw2Closed);
         }
     }
 
@@ -93,10 +107,10 @@ public class MainTeleOp extends LinearOpMode {
 
     private void updateSlides() {
 
-        double inputPower = -gamepad2.left_stick_y;
+        double inputPower = 0.4*-gamepad2.left_stick_y;
         slidesMotor.setPower(inputPower + slideKg);
 
-        setClawPivot(slidesMotor.getCurrentPosition() < pivotHeight);
+        //setClawPivot(slidesMotor.getCurrentPosition() < pivotHeight);
 
     }
 
@@ -126,8 +140,8 @@ public class MainTeleOp extends LinearOpMode {
     }
 
     private void updateDrivetrain() {
-        double y = -gamepad1.left_stick_y;
-        double x = gamepad1.left_stick_x * 1.1;
+        double y = -0.5*gamepad1.left_stick_y;
+        double x = 0.5*gamepad1.left_stick_x * 1.1;
         double rx = gamepad1.right_stick_x;
         double d = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
