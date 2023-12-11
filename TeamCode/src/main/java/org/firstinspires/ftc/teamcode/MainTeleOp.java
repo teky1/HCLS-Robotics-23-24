@@ -14,7 +14,7 @@ public class MainTeleOp extends LinearOpMode {
     public double pivotHeight = 500;
 
     // pivots
-    public double flatPivot = 0;
+    public double flatPivot = 0.03;
     public double anglePivot = 0.25;
 
     // claw
